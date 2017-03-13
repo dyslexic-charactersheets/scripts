@@ -6,6 +6,19 @@ var pathfinderSkills = [
   "Influence", "Intimidate", "Linguistics", "Locate Traps", "Nature", "Perception", "Performance", "Religion",
   "Ride", "Sense Motive", "Sleight of Hand", "Society", "Spellcraft", "Stealth", "Survival", "Swim", "Track",
   "Use Magic Device", "Wild Empathy",
+  "Craft (alchemy)", "Craft (armour)", "Craft (baskets)", "Craft (books)", "Craft (bows)", "Craft (calligraphy)",
+  "Craft (carpentry)", "Craft (cloth)", "Craft (clothing)", "Craft (glass)", "Craft (jewelry)",
+  "Craft (leather)", "Craft (locks)", "Craft (paintings)", "Craft (pottery)", "Craft (sculptures)",
+  "Craft (ships)", "Craft (shoes)", "Craft (stonemasonry)", "Craft (traps)", "Craft (weapons)",
+  "Perform (act)", "Perform (comedy)", "Perform (dance)", "Perform (keyboard)", "Perform (oratory)",
+  "Perform (percussion)", "Perform (string)", "Perform (wind)", "Perform (sing)",
+  "Profession (architect)", "Profession (baker)", "Profession (barrister)", "Profession (brewer)",
+  "Profession (butcher)", "Profession (clerk)", "Profession (cook)", "Profession (courtesan)", "Profession (driver)",
+  "Profession (engineer)", "Profession (farmer)", "Profession (fisherman)", "Profession (gambler)",
+  "Profession (gardener)", "Profession (herbalist)", "Profession (innkeeper)", "Profession (librarian)",
+  "Profession (merchant)", "Profession (midwife)", "Profession (miller)", "Profession (miner)", "Profession (porter)",
+  "Profession (sailor)", "Profession (scribe)", "Profession (shepherd)", "Profession (stable master)",
+  "Profession (soldier)", "Profession (tanner)", "Profession (trapper)", "Profession (woodcutter)",
   "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", 
   "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", 
   "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Knowledge (psionics)"
@@ -17,6 +30,13 @@ var dnd35skills = [
   "Heal", "Hide", "Iaijutsu Focus", "Intimidate", "Jump", "Listen", "Martial Lore", "Move Silently", "Open Lock", 
   "Psicraft", "Ride", "Scry", "Search", "Sense Motive", "Sleight of Hand", "Spellcraft", "Spot", "Survival", 
   "Swim", "Track", "Truespeak", "Tumble", "Use Magic Device", "Use Rope",
+  "Craft (alchemy)", "Craft (armourer)", "Craft (blacksmithing)", "Craft (bookbinding)", "Craft (bowmaking)",
+  "Craft (brewery)", "Craft (calligraphy)", "Craft (carpentry)", "Craft (carver)", "Craft (chemist)", "Craft (founder)",
+  "Craft (glassblowing)", "Craft (cooking)", "Craft (jeweler)", "Craft (leatherworking)", "Craft (masonry)",
+  "Craft (mechanic)", "Craft (painting)", "Craft (pottery)", "Craft (sculpting)", "Craft (stone masonry)",
+  "Craft (tailor)", "Craft (weaving)", "Craft (winemaking)",
+  "Perform (act)", "Perform (comedy)", "Perform (dance)", "Perform (keyboard)", "Perform (oratory)",
+  "Perform (percussion)", "Perform (string)", "Perform (wind)", "Perform (sing)",
   "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", 
   "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", 
   "Knowledge (religion)", "Knowledge (planes)", "Knowledge (psionics)"
@@ -294,7 +314,8 @@ var i18n = {
   replacements: [
     {
       pages: [
-        "Pathfinder/GM/Kingdom/Kingdom.ai"
+        "Pathfinder/GM/Kingdom/Kingdom.ai",
+        "Pathfinder/GM/Kingdom/Kingdom finances.ai"
       ],
       replacements: [
         { from: ["Light", ""], to: ["Light <weight>", ""] }
@@ -331,10 +352,13 @@ var i18n = {
   ],
 
   getPageAdditions: function (filename) {
+    // log("getPageAdditions", filename);
     for ( var i = 0; i < this.additions.length; i++ ) {
       for (var j = 0; j < this.additions[i].pages.length; j++ ) {
-        if (filename == this.additions[i].pages[j]) 
+        if (filename == this.additions[i].pages[j]) {
+          // log("found page additions", this.additions[i]);
           return this.additions[i].additions
+        }
       }
     }
     return [];
@@ -343,13 +367,16 @@ var i18n = {
   getTranslationReplacement: function(text, partOf, filename) {
     //text = i18n.deswash(text);
     //partOf = i18n.deswash(partOf);
-    for ( var i = 0; i < this.replacements.length; i++ ) {
-      for ( var j = 0; j < this.replacements[i].pages.length; j++ ) {
-        if (filename == this.replacements[i].pages[j]) {
-          for ( var k = 0; k < this.replacements[i].replacements.length; k++ ) {
-            if (text == this.replacements[i].replacements[k].from[0] && partOf == this.replacements[i].replacements[k].from[1])
-              log("Replacing entry", this.replacements[i].replacements[k].from, this.replacements[i].replacements[k].to)
-              return this.replacements[i].replacements[k].to;
+    for ( var i = 0; i < i18n.replacements.length; i++ ) {
+      for ( var j = 0; j < i18n.replacements[i].pages.length; j++ ) {
+        if (filename == i18n.replacements[i].pages[j]) {
+          var repl = i18n.replacements[i].replacements;
+          // log("found page replacements", repl);
+          for ( var k = 0; k < repl.length; k++ ) {
+            if (text == repl[k].from[0] && partOf == repl[k].from[1]) {
+              // log("Replacing entry", repl[k].from, repl[k].to)
+              return repl[k].to;
+            }
           }
         }
       }

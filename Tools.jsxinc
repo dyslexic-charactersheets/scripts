@@ -1,8 +1,17 @@
 // A bunch of useful functions
 #include underscore.js
 
+$.level = 2;
 
 var baseFolder = 'C:/Users/Marcus/Documents/Projects/Character Sheets/';
+var altBaseFolder = '~/Documents/Projects/Character Sheets/';
+
+var pagesFolder = baseFolder+'pages/';
+var assetsFolder = baseFolder+'assets/';
+var scriptsFolder = baseFolder+'scripts/';
+var iconicsFolder = baseFolder+'iconics/';
+var websiteFolder = baseFolder+'website/';
+
 
 Array.prototype.contains = function(obj) {
     var i = this.length;
@@ -313,6 +322,17 @@ Folder.prototype.getAllFiles = function () {
   recurse(this);
   return fileList;
 };
+
+function simpleFilename(name) {
+  name = name.replace(webMaster.baseURI, '').replace(webMaster.altBaseURI, '');
+  name = name.replaceAll("%20", " ");
+  return name;
+}
+
+File.prototype.simpleFilename = function () {
+  var uri = this.absoluteURI;
+  return simpleFilename(uri);
+}
 
 //  transform a CSV-style 2D array with headings into an array of objects
 Array.prototype.associate = function () {

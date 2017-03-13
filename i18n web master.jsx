@@ -15,7 +15,8 @@ var webMaster = {
   game: "",
   level: 1,
 
-  baseURI: new Folder(baseFolder).absoluteURI+"/",
+  baseURI: new Folder(pagesFolder).absoluteURI+"/",
+  altBaseURI: new Folder(pagesFolder.replace(baseFolder, altBaseFolder)).absoluteURI+"/",
 
   clear: function() {
     entries = {};
@@ -64,8 +65,9 @@ var webMaster = {
   extractFile: function(file) {
     var num = 0;
     try {
-      var filename = file.absoluteURI.replace(webMaster.baseURI, '');
-      log("Extracting from file", file.fullName, filename)
+      // var filename = file.absoluteURI.replace(webMaster.baseURI, '').replace(webMaster.altBaseURI, '');
+      var filename = file.simpleFilename();
+      log("Extracting from file", file.fullName, filename);
       var doc = app.open(file);
 
       var frames = doc.textFrames;
@@ -88,6 +90,7 @@ var webMaster = {
             )) {
             str = str+String(range.contents);
           } else {
+            // log(" - Adding part of frame", str);
             this.pushEntry(str, fullstr, filename);
             partspushed++;
             num++;
@@ -96,23 +99,27 @@ var webMaster = {
           prev = range;
         }
         if (str !== '') {
+          // log(" - Adding tail of frame", str);
           this.pushEntry(str, fullstr, filename);
           partspushed++;
           num++;
         }
 
         if (partspushed == 0) {
+          // log(" - Adding whole frame", fullstr);
           this.pushEntry(fullstr, "", filename);
-            num++;
+          num++;
         }
       }
       doc.close();
 
       var additions = i18n.getPageAdditions(filename);
-      log("Page additions: "+additions.join(", "))
+      // log("Page additions", additions);
       for ( var i = 0; i < additions.length; i++ ) {
-        var add = additions[i]
-        this.pushEntry(add, add, filename)
+        var add = additions[i];
+        // log(" - Adding entry", add);
+        this.pushEntry(add, "", filename);
+        num++;
       }
     } catch (e) {
       log("Error in file", file, { "Error": e.message } );
@@ -150,79 +157,81 @@ log("Base URI", webMaster.baseURI)
 webMaster.game = "Pathfinder"
 webMaster.level = 1;
 webMaster.volume = "Core Rulebook";
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Core'));
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Extra'));
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/GM'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Core'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Extra'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/GM'));
 
 webMaster.level = 2;
 webMaster.volume = "Advanced Players Guide"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Advanced'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Advanced'));
 webMaster.volume = "Ultimate Magic"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Ultimate Magic'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Ultimate Magic'));
 webMaster.volume = "Ultimate Combat"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Ultimate Combat'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Ultimate Combat'));
 webMaster.volume = "Advanced Class Guide"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Advanced Class Guide'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Advanced Class Guide'));
 webMaster.volume = "Occult Adventures"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Occult'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Occult'));
 webMaster.volume = "Pathfinder Unchained"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Unchained'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Unchained'));
 
 webMaster.level = 3;
 webMaster.volume = ""
-webMaster.extractFolder(new Folder(baseFolder+'All'));
-webMaster.extractFolder(new Folder(baseFolder+'Extra'));
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Archetypes'));
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Prestige Classes'));
+webMaster.extractFolder(new Folder(pagesFolder+'All'));
+webMaster.extractFolder(new Folder(pagesFolder+'Extra'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Archetypes'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Prestige Classes'));
 webMaster.volume = "Mythic Adventures"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Mythic'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Mythic'));
 webMaster.volume = "Pathfinder Unchained"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Unchained'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Unchained'));
 
 webMaster.level = 4;
 webMaster.volume = "Psionics Unleashed"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Psionics'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Psionics'));
 webMaster.volume = "Tome of Secrets"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/Tome of Secrets'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Tome of Secrets'));
 webMaster.volume = "NeoExodus"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/NeoExodus'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/NeoExodus'));
 webMaster.volume = "TPK"
-webMaster.extractFolder(new Folder(baseFolder+'Pathfinder/TPK'));
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/TPK'));
 
 
 webMaster.game = "3.5";
 webMaster.level = 1;
 webMaster.volume = "Players Handbook"
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Core'));
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Barbarian'));
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Variants'));
-webMaster.extractFolder(new Folder(baseFolder+'3.5/DM'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Core'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Barbarian'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Variants'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/DM'));
 
 webMaster.level = 2;
 webMaster.volume = "";
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Extended'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Extended'));
 
 webMaster.level = 3;
 webMaster.volume = ""
-webMaster.extractFolder(new Folder(baseFolder+'All'));
-webMaster.extractFolder(new Folder(baseFolder+'Extra'));
+webMaster.extractFolder(new Folder(pagesFolder+'All'));
+webMaster.extractFolder(new Folder(pagesFolder+'Extra'));
 webMaster.volume = "Dragon Compendium";
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Dragon Compendium'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Dragon Compendium'));
 
 webMaster.level = 4;
 webMaster.volume = "";
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Psionics'));
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Tomes'));
-webMaster.extractFolder(new Folder(baseFolder+'3.5/Incarnum'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Psionics'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Tomes'));
+webMaster.extractFolder(new Folder(pagesFolder+'3.5/Incarnum'));
 
 
 webMaster.game = "Extra"
 webMaster.level = 2;
 webMaster.volume = "";
-webMaster.extractFolder(new Folder(baseFolder+'All'));
-webMaster.extractFolder(new Folder(baseFolder+'Extra'));
+webMaster.extractFolder(new Folder(pagesFolder+'All'));
+webMaster.extractFolder(new Folder(pagesFolder+'Extra'));
 
-
-webMaster.saveCSV(new File(baseFolder+'Languages/Master.csv'));
+var outfile = new File(pagesFolder+"Languages/Master.csv");
+log("Saving to "+outfile.absoluteURI);
+webMaster.saveCSV(outfile);
 webMaster.clear();
+log("Done");
 alert("Done");
