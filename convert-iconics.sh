@@ -1,8 +1,9 @@
 #!/bin/bash
 
-SOURCE="../Iconics"
-TARGET="../../Character Sheets Website/public/images/iconics";
+SOURCE="../iconics"
+TARGET="../assets/iconics"
 TXT="$TARGET/iconics.txt"
+MAGICWAND="$(readlink -f ./magicwand)"
 echo -n "" > "$TXT"
 cd "$SOURCE"
 find . -type f | while read F
@@ -28,7 +29,7 @@ do
 
       echo "   * Large file: $LARGE"
       mkdir -p "$(dirname "$LARGE")"
-      convert -set colorspace sRGB -bordercolor white -border 10x10 +profile '*' "$F" png:- | ../Scripts/magicwand 0,0 -t 4 -r outside -c trans png:- png:- | convert -trim png:- "$LARGE"
+      convert -set colorspace sRGB -bordercolor white -border 10x10 +profile '*' "$F" png:- | "$MAGICWAND" 0,0 -t 4 -r outside -c trans png:- png:- | convert -trim png:- "$LARGE"
 
       echo "   * Small file: $SMALL"
       mkdir -p "$(dirname "$SMALL")"
