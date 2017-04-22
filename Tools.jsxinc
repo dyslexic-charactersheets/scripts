@@ -83,7 +83,7 @@ function any2string(any, depth, unquoted) {
   depth = (typeof depth === "undefined") ? 0 : parseInt(depth);
   var toplevel = depth == 0;
   depth++;
-  if (depth > 3) return "... (too deep)";
+  if (depth > 6) return "...";
 
   var type = typeof any;
     if (type === "undefined" || any == null) return '-';
@@ -137,6 +137,9 @@ function any2string(any, depth, unquoted) {
     if (any instanceof File) return any.fullName;
     if (any instanceof Folder) return any.fullName;
 
+    // if (any instanceof Document) return "<doc>";
+    // if (any instanceof Application) return "<app>";
+
     //  assicative object
     //alert("start object "+objtype);
     var str = objtype.substring(1, objtype.length - 1);
@@ -157,9 +160,9 @@ function any2string(any, depth, unquoted) {
          if (first) first = false;
          else str = str+',';
 
-         key = any2string(value, depth).substring(0,64);
+         key = any2string(key, depth).substring(0,64);
          value = any2string(value, depth).substring(0,256);
-         str = str+any2string(key, depth)+': '+value;
+         str = str+key+': '+value;
     }
     str = str + '}';
     //alert("end object "+objtype);

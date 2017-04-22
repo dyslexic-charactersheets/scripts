@@ -1,7 +1,26 @@
 #include Tools.jsxinc
 
+/*
+  Replace fonts
+
+  Given a CSV file in the right format, replace fonts across all files.
+
+    "Family","Style","To family","To style","To scale","To tracking","To width"
+    "Dirty Duo","Regular","Amatic","Bold",1.1,15,160
+
+  The fields:
+
+    Family: the family of the existing font
+    Style: the style of the existing font
+    To family: the fmaily of the replacement font
+    To style: the style of the replacement font
+    To scale (optional): If present, scale the font up or down
+    To tracking (optional, default 25): If present, set the tracking of the font
+    To width (optional, default 100): If present, set the horizontal width of the font
+*/
+
 (function () {
-  var sourceFolder = Folder.selectDialog( 'Select the folder with Illustrator files in which you want to replace fonts', baseFolder);
+  var sourceFolder = Folder.selectDialog( 'Select the folder with Illustrator files in which you want to replace fonts', pagesFolder);
   if (sourceFolder == null) {
     return;
   }
@@ -103,7 +122,7 @@
         doc.close();
         success++;
       } else {
-        doc.close(DONOTSAVECHANGES)
+        doc.close(DONOTSAVECHANGES);
       }
     } catch (e) {
       log("Error in file", file, { "Error": e.message } );

@@ -8,9 +8,12 @@
 i18n.init();
 
 (function () {
-	var srcFile = new File(baseFolder+"Pathfinder/Core/Cleric.ai");
-	var dstFile = new File(baseFolder+"Languages/German/Pathfinder/Core/Cleric.ai");
-	var messagesFile = new File(baseFolder+"Languages/German.csv");
+	var filename = "Pathfinder/Core/Cleric.ai";
+	var language = "Russian";
+
+	var srcFile = new File(pagesFolder+filename);
+	var dstFile = new File(pagesFolder+"Languages/"+language+"/"+filename);
+	var messagesFile = new File(pagesFolder+"Languages/"+language+".csv");
 
 	i18n.loadTranslations(messagesFile);
 	i18n.applyTranslationsFile(srcFile, dstFile);
