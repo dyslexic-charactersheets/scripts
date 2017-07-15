@@ -346,7 +346,7 @@ var i18n = {
         "3.5/DM/NPC.ai"
       ],
       replacements: [
-        { "from": ["d", ""], to: ["d <dice>", ""] }
+        { "from": ["d", ""], to: ["d00", ""] }
       ]
     },
   ],

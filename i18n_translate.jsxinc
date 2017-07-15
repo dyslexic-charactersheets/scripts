@@ -37,6 +37,9 @@ i18n.loadTranslations = function (messagesFile) {
         messages[i]['Part of'] = '';
       }
 
+      // special case: Russian is broken in the Merriweather font, so swap some characters to make it look close enough
+      messages[i]['Translation'] = messages[i]['Translation'].replace(/Ы/g, 'ЬІ');
+
 	    if (messages[i]['Translation'] && messages[i]['Translation'].length > 0 && messages[i]['Translation'] !== '-') {
 	      messages2.push(messages[i]);
 	      if (messages[i]['Original'] == 'd00' && messages[i]['Translation'])
@@ -80,9 +83,8 @@ i18n.translate = function(message, partof) {
             return translation;
         }
       } else if (message == "d") {
-        var translation = i18n.d00.replace('/00$/', '');
-        if (translation != message)
-          return translation;
+        var translation = i18n.d00.replace(/00$/, '');
+        return translation;
       }
 	  }
   } catch (e) {

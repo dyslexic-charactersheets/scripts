@@ -29,7 +29,7 @@ var webMaster = {
     text = replacement[0];
     partOf = replacement[1];
 
-    if (partOf == '' && (text.match(/^d[0-9]+$/) || text == '0')) {
+    if (partOf == '' && (text.match(/^d[0-9]+$/) || text == '0' || text == '')) {
       text = 'd00';
     }
 
