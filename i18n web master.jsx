@@ -118,7 +118,7 @@ var webMaster = {
           num++;
         }
       }
-      doc.close(DONOTSAVECHANGES);
+      doc.close(SaveOptions.DONOTSAVECHANGES);
 
       var additions = i18n.getPageAdditions(filename);
       // log("Page additions", additions);
