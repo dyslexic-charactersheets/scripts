@@ -11,6 +11,7 @@ i18n.init();
 
 var webMaster = {
   entries: {},
+  extractedFiles: {},
   volume: "",
   game: "",
   level: 1,
@@ -63,6 +64,12 @@ var webMaster = {
   },
 
   extractFile: function(file) {
+    if (file in webMaster.extractedFiles && webMaster.extractedFiles[file.fullName] == 1) {
+      log("Already processed file", file.fullName);
+      return;
+    }
+    webMaster.extractedFiles[file.fullName] = 1;
+
     var num = 0;
     try {
       // var filename = file.absoluteURI.replace(webMaster.baseURI, '').replace(webMaster.altBaseURI, '');
@@ -111,7 +118,7 @@ var webMaster = {
           num++;
         }
       }
-      doc.close();
+      doc.close(DONOTSAVECHANGES);
 
       var additions = i18n.getPageAdditions(filename);
       // log("Page additions", additions);
@@ -159,7 +166,6 @@ webMaster.level = 1;
 webMaster.volume = "Core Rulebook";
 webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Core'));
 webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/Extra'));
-webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/GM'));
 
 webMaster.level = 2;
 webMaster.volume = "Advanced Players Guide"
@@ -195,6 +201,13 @@ webMaster.volume = "NeoExodus"
 webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/NeoExodus'));
 webMaster.volume = "TPK"
 webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/TPK'));
+
+webMaster.level = 3;
+webMaster.volume = "Ultimate Equipment"
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/GM/Kingdom'));
+webMaster.volume = "Core Rulebook"
+webMaster.level = 1;
+webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/GM'));
 
 
 webMaster.game = "3.5";
