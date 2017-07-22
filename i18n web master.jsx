@@ -203,7 +203,7 @@ webMaster.volume = "TPK"
 webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/TPK'));
 
 webMaster.level = 3;
-webMaster.volume = "Ultimate Equipment"
+webMaster.volume = "Ultimate Campaign"
 webMaster.extractFolder(new Folder(pagesFolder+'Pathfinder/GM/Kingdom'));
 webMaster.volume = "Core Rulebook"
 webMaster.level = 1;
