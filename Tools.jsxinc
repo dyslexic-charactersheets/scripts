@@ -3,7 +3,7 @@
 
 $.level = 2;
 
-var baseFolder = 'C:/Users/Marcus/Documents/Projects/Character Sheets/';
+var baseFolder = 'D:/Projects/Character Sheets/';
 var altBaseFolder = '~/Documents/Projects/Character Sheets/';
 
 var pagesFolder = baseFolder+'pages/';

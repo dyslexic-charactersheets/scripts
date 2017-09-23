@@ -21,6 +21,7 @@ for (var i = 0; i < languages.length; i++) {
 		var folder = folders[j];
 		var srcFolder = new Folder(pagesFolder + folder);
 		var dstFolder = new Folder(pagesFolder + 'Languages/' + language + '/' + folder);
+		if (!dstFolder.exists) dstFolder.create();
 		i18n.applyTranslationsFolder(srcFolder, dstFolder);
 		i18n.tick();
 	}
