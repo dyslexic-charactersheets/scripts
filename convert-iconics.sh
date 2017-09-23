@@ -6,11 +6,13 @@ TXT="$TARGET/iconics.txt"
 MAGICWAND="$(readlink -f ./magicwand)"
 echo -n "" > "$TXT"
 cd "$SOURCE"
-find . -type f | while read F
+
+FILES="$(find . -type f | grep -v '.git')"
+echo "$FILES" | while read F
 do
   F=$(echo "$F" | sed 's/^..//')
   FB=$(dirname "$F")
-  FN=$(basename "$(basename "$F" .jpg)" .png)
+  FN=$(basename "$(basename "$(basename "$F" .jpeg)" .jpg)" .png)
   if [ "$FB" != "." ]
   then
     NAME="$FB/$FN"
