@@ -122,7 +122,7 @@
         doc.close();
         success++;
       } else {
-        doc.close(DONOTSAVECHANGES);
+        doc.close(SaveOptions.DONOTSAVECHANGES);
       }
     } catch (e) {
       log("Error in file", file, { "Error": e.message } );
