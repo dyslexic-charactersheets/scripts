@@ -236,6 +236,16 @@ webMaster.extractFolder(new Folder(pagesFolder+'3.5/Tomes'));
 webMaster.extractFolder(new Folder(pagesFolder+'3.5/Incarnum'));
 
 
+webMaster.game = "Starfinder"
+webMaster.level = 1;
+webMaster.volume = "Core Rulebook";
+webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Core'));
+webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Starship'));
+webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Maps'));
+webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Extra'));
+webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/GM'));
+
+
 webMaster.game = "Extra"
 webMaster.level = 2;
 webMaster.volume = "";
