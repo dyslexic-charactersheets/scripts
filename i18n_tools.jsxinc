@@ -69,6 +69,13 @@ var i18n = {
     return text;
   },
 
+  normalisePOT: function (text) {
+    if (typeof text === "undefined" || text == null) return '';
+    text = String(text).trim();
+    text = text.replace(/\n|\r/g, '\\n"\n"');
+    return text;
+  },
+
   denormalise: function (str) {
     if (typeof str === "undefined") return '';
     var text = String(str).trim();
@@ -349,6 +356,40 @@ var i18n = {
         { "from": ["d", ""], to: ["d00", ""] }
       ]
     },
+    {
+      pages: [
+        "Starfinder/Starship/Starship.ai",
+        "Starfinder/Starship/Starship Crew.ai",
+        "Starfinder/Starship/Starship Crew Cards.ai",
+        "Starfinder/Core/Computer.ai",
+      ],
+      replacements: [
+        { from: ["Tier", ""], to: ["Tier <starship>", ""] },
+        { from: ["Ship|Tier", ""], to: ["Ship|Tier <starship>", ""] },
+        { from: ["TIER", ""], to: ["TIER <starship>", ""] },
+      ]
+    }
+  ],
+
+  disambiguation: [
+    {
+      pages: [
+        "Pathfinder/GM/Kingdom/Kingdom.ai",
+        "Pathfinder/GM/Kingdom/Kingdom finances.ai"
+      ],
+      replacements: [
+        { from: ["Light", ""], to: "weight" }
+      ]
+    },
+    {
+      pages: [
+        "3.5/Extended/Artificer.ai",
+        "3.5/Extended/Warmage.ai"
+      ],
+      replacements: [
+        { from: ["Light", ""], to: "illumination" }
+      ]
+    }
   ],
 
   getPageAdditions: function (filename) {
@@ -383,6 +424,68 @@ var i18n = {
     }
     return [text, partOf];
   },
+
+  getTranslationDisambiguation: function(text, partOf, filename) {
+    for ( var i = 0; i < i18n.replacements.length; i++ ) {
+      for ( var j = 0; j < i18n.replacements[i].pages.length; j++ ) {
+        if (filename == i18n.replacements[i].pages[j]) {
+          var repl = i18n.replacements[i].replacements;
+          for ( var k = 0; k < repl.length; k++ ) {
+            if (text == repl[k].from[0] && partOf == repl[k].from[1]) {
+              return repl[k].to;
+            }
+          }
+        }
+      }
+    }
+    return "";
+  },
+
+  substituteFonts: false,
+
+  substituteFontsByLanguage: {
+    "Chinese (traditional)": true,
+    "Chinese (simplified)": true
+  },
+
+  fontSubstitutions: [
+    {
+      "Family": "Merriweather",
+      "Style": "Black",
+      "To family": "Noto Serif TC Black",
+      "To style": "Regular",
+      "To scale": 1.0,
+      "To tracking": 25,
+      "To width": 100
+    },
+    {
+      "Family": "Merriweather",
+      "Style": "Regular",
+      "To family": "Noto Serif TC",
+      "To style": "Regular",
+      "To scale": 1.0,
+      "To tracking": 25,
+      "To width": 100
+    },
+    {
+      "Family": "Roboto",
+      "Style": "Condensed Bold",
+      "To family": "Noto Sans TC Bold",
+      "To style": "Regular",
+      "To scale": 1.0,
+      "To tracking": 25,
+      "To width": 100
+    },
+    {
+      "Family": "Roboto",
+      "Style": "Condensed",
+      "To family": "Noto Sans TC Regular",
+      "To style": "Regular",
+      "To scale": 1.0,
+      "To tracking": 25,
+      "To width": 100
+    }
+  ],
 
   deswash: function(text) {
     var result = "";

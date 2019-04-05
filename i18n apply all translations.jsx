@@ -8,7 +8,7 @@
 i18n.init();
 
 var folders = [ "Pathfinder", "3.5", "Starfinder", "All", "Extra" ];
-var languages = [ "Italian", "Spanish", "Polish", "German", "French", "Portuguese", "Brazilian Portuguese", "Russian", "US English" ];
+var languages = [ /* "Italian", "Spanish", "Polish", "German", */ "French" /*, "Portuguese", "Brazilian Portuguese", "Russian", "US English" */ ];
 log("i18n: Preparing to translate into", languages);
 
 for (var i = 0; i < languages.length; i++) {

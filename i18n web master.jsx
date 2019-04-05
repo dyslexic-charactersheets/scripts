@@ -245,6 +245,10 @@ webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Maps'));
 webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Extra'));
 webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/GM'));
 
+webMaster.level = 2;
+webMaster.volume = "Archetypes";
+webMaster.extractFolder(new Folder(pagesFolder+'Starfinder/Archetypes'));
+
 
 webMaster.game = "Extra"
 webMaster.level = 2;

@@ -16,6 +16,12 @@ i18n.patternise = function (text) {
     return '/'+text+'/';
 };
 
+i18n.leadingWhitespace = function(text) {
+  var text = String(text);
+  var trimmed = text.ltrim();
+  return text.substring(0, text.length - trimmed.length);
+}
+
 i18n.trailingWhitespace = function(text) {
   var text = String(text);
   var trimmed = text.rtrim();
@@ -52,6 +58,27 @@ i18n.loadTranslations = function (messagesFile) {
     log("i18n: Error loading translations", messagesFile, { "Error": e.message } );
   }
 };
+
+i18n.enableFontSubstitutions = function() {
+  i18n.substituteFonts = true;
+
+  if (!i18n.hasOwnProperty("substitutions")) {
+    log("Fonts will be substituted");
+    i18n.substitutions = [];
+    for (var i = 0; i < textFonts.length; i++) {
+      var font = textFonts[i];
+      // log("Text font:", font.family, font.style);
+      for (var j = 0; j < i18n.fontSubstitutions.length; j++) {
+        var substitution = i18n.fontSubstitutions[j];
+        if (substitution['To family'] == font.family && substitution['To style'] == font.style) {
+          substitution.textFont = font;
+          i18n.substitutions.push(substitution);
+        }
+      }
+    }
+    log("Found substitutions", i18n.substitutions.length);
+  }
+}
 
 i18n.translate = function(message, partof) {
 	try {
@@ -102,7 +129,7 @@ i18n.applyTranslationsFolder = function (srcFolder, dstFolder) {
 
 		for ( var i = 0; i < files.length; i++ ) {
 		  var srcFile = files[i];
-		  var dstFile = new File(dstFolder.fullName+srcFile.fullName.substring(srcFolder.fullName.length));
+      var dstFile = new File(dstFolder.fullName+srcFile.fullName.substring(srcFolder.fullName.length));
 		  i18n.applyTranslationsFile(srcFile, dstFile)
 		}
   } catch (e) {
@@ -124,11 +151,35 @@ i18n.applyTranslationsFile = function (srcFile, dstFile) {
     var frames = doc.textFrames;
     for ( var j = 0; j < frames.length; j++ ) {
       var frame = frames[j];
+      /*
+      if (i18n.substituteFonts) {
+        var ranges = frames[j].textRanges;
+        for ( var k = 0; k < ranges.length; k++ ) {
+          var range = ranges[k];
+          for (var f = 0; f < substitutions.length; f++) {
+            // log("Comparing font:", range.characterAttributes.textFont.family, range.characterAttributes.textFont.style, "==", substitutions[f]['Family'], substitutions[f]['Style']);
+            if (range.characterAttributes.textFont.family == substitutions[f]['Family'] 
+              && range.characterAttributes.textFont.style == substitutions[f]['Style']) {
+              // log("Substituting font:", substitutions[f]['Family'], substitutions[f]['Style']);
+              range.characterAttributes.textFont = substitutions[f].textFont;
+              if (substitutions[f]['To scale'])
+                range.characterAttributes.size = range.characterAttributes.size * substitutions[f]['To scale'];
+              if (substitutions[f]['To tracking'])
+                range.characterAttributes.tracking = substitutions[f]['To tracking'];
+              if (substitutions[f]['To width'])
+                range.characterAttributes.horizontalScale = substitutions[f]['To width'];
+              affected = true;
+            }
+          }
+        }
+      }
+      */
+
       if (i18n.translateFrame(frame, filePath))
         countTranslatedFrames++;
     }
 
-    if (countTranslatedFrames > 0) {
+    if (i18n.substituteFonts || countTranslatedFrames > 0) {
       doc.saveAs(dstFile);
       i18n.countTranslatedFiles++;
     }
@@ -140,23 +191,6 @@ i18n.applyTranslationsFile = function (srcFile, dstFile) {
 };
 
 i18n.translateFrame = function (frame, filePath) {
-  // var fullstr = frame.contents;
-  // log('Translating frame', frame.contents);
-  // var replacement = i18n.getTranslationReplacement(fullstr, partOf, filePath);
-  // fullstr = replacement[0];
-  // var partOf = replacement[1];
-
-/*
-  var fulltranslation = i18n.translate(fullstr, partOf);
-  if (fulltranslation) {
-    log('Translating full frame', fullstr, fulltranslation);
-    frame.language = i18n.language; // LanguageType.ITALIAN;
-    frame.contents = fulltranslation;
-    i18n.countTranslatedLines++;
-    countTranslatedFrames++;
-    return true;
-  }*/
-
   // split range based on continuous font, size and colour
   // always keep the splitting rules in sync with the other script!
   var spans = i18n.splitFrameIntoSpans(frame, filePath);
@@ -171,8 +205,15 @@ i18n.translateFrame = function (frame, filePath) {
       // log('Found part translation', span.str, translation);
       hasTranslation = true;
       spans[i].translation = translation;
-      spans[i].trailingWhitespace = i18n.trailingWhitespace(spans[i].str);
+      if (translation != span.str) {
+        spans[i].font = spans[i].translatedFont;
+      }
+    } else {
+      // log('No translation', span.str);
+      spans[i].translation = "";
     }
+    spans[i].leadingWhitespace = i18n.leadingWhitespace(span.str);
+    spans[i].trailingWhitespace = i18n.trailingWhitespace(span.str);
   }
   if (!hasTranslation) {
     return; // bail early
@@ -182,17 +223,10 @@ i18n.translateFrame = function (frame, filePath) {
   var fulltext = '';
   for (var i = 0; i < spans.length; i++) {
     var span = spans[i];
-    var text;
-    if (span.translation) {
-      span.text = span.translation + span.trailingWhitespace;
-    } else {
-      span.text = span.str;
-    }
-
+    span.text = span.leadingWhitespace + span.translation + span.trailingWhitespace;
     fulltext += span.text;
-    // TODO set range style
   }
-  // log('Setting frame text', fulltext);
+  log('Setting frame text', fulltext);
   frame.contents = fulltext;
 
   // reapply character attributes
@@ -209,249 +243,18 @@ i18n.translateFrame = function (frame, filePath) {
     }
     
     var span = spans[spanNum];
-    var attr = span.characterAttributes;
-    // log('Style range', frame.textRanges[i].contents, spanNum, span.attr);
+    var font = span.font;
+    // var font = span.translation ? span.translatedFont : span.font;
+    log('Style range', frame.textRanges[i].contents, spanNum, font.f);
 
-    frame.textRanges[i].characterAttributes.fillColor = attr.fillColor;
-    frame.textRanges[i].characterAttributes.textFont = attr.textFont;
-    frame.textRanges[i].characterAttributes.size = attr.size;
+    frame.textRanges[i].characterAttributes.fillColor = span.fillColor;
+    frame.textRanges[i].characterAttributes.textFont = font.textFont;
+    frame.textRanges[i].characterAttributes.size = font.size;
 
     // next
     local += frame.textRanges[i].contents.length;
   }
 
-
-
-
-  // var nranges = frame.textRanges.length;
-  // for (var i = spans.length; i < nranges && i < frame.textRanges.length; i++) {
-  //   frame.textRanges[i].remove();
-  // }
-
-
-/*
-  // apply translation replacement, keeping track of index so far
-  var offset = 0;
-  for (var i = 0; i < spans.length; i++) {
-    var span = spans[i];
-
-    // local tools for walking through text ranges
-    var rangeNumber = 0;
-    var rangeCharOffset = 0;
-    function walkCharacters(n) {
-      log('walkCharacters', n);
-      var walked = 0;
-      while (walked < n) {
-        if (rangeNumber >= frame.textRanges.length) {
-          return; // reached the end of the frame, stop before we get an error
-        }
-        var range = frame.textRanges[rangeNumber];
-
-        // if there are character left in the current range, account for them first
-        var rlen = range.contents.length;
-        var remainingChars = rlen - rangeCharOffset;
-        if (remainingChars > 0) {
-          var towalk = n - walked;
-          if (remainingChars >= towalk) {
-            rangeCharOffset += towalk;
-            return; // found it!
-          }
-          walked += remainingChars;
-        }
-
-        // move to the next range
-        rangeNumber++;
-        rangeCharOffset = 0;
-      }
-    }
-    function seekCharacter(ch) {
-      log('seekCharacter', ch);
-      // TODO!
-    }
-    function insertCharacters(str) {
-      log('insertCharacters', str);
-      var before = frame.textRanges[rangeNumber].contents.substring(0, rangeCharOffset);
-      var after = frame.textRanges[rangeNumber].contents.substring(rangeCharOffset);
-      log('Replacing range contents', frame.textRanges[rangeNumber].contents, before+str+after);
-      frame.textRanges[rangeNumber].contents = before+str+after;
-      rangeCharOffset += str.length;
-    }
-    function removeCharacters(n) {
-      log('removeCharacters', n);
-      var removed = 0;
-      while (removed < n) {
-        if (rangeNumber >= frame.textRanges.length) {
-          return; // reached the end of the frame, stop before we get an error
-        }
-        var range = frame.textRanges[rangeNumber];
-
-        // if there are character left in the current range, account for them first
-        var rlen = range.contents.length;
-        var before = range.contents.substring(0, rangeCharOffset);
-        var remainingChars = rlen - rangeCharOffset;
-        if (remainingChars > 0) {
-          var toremove = n - removed;
-          if (remainingChars >= toremove) {
-            var after = range.contents.substring(rangeCharOffset+toremove);
-            range.contents = before+after;
-            rangeCharOffset += toremove;
-            return; // that's enough
-          }
-          range.contents = before;
-          removed += remainingChars;
-        }
-
-        // move to the next range
-        rangeNumber++;
-        rangeCharOffset = 0;
-      }
-    }
-
-    if (span.offset) {
-      offset += span.offset;
-    }
-    if (span.translation) {
-      log('Applying translation', span.translation);
-
-      // walk from the beginning until we've skipped the necessary number of characters and find the right range to insert into
-      walkCharacters(offset);
-
-      // now just to be sure, skip forward until we find the first character of the original string
-      seekCharacter(spans[i].str[0]);
-
-      // now we insert the replacement characters
-      insertCharacters(span.translation + span.trailingWhitespace);
-
-      // and remove enough characters to clear out 
-      removeCharacters(span.str.length);
-
-      offset += spans[i].translation.length + spans[i].trailingWhitespace.length;
-    } else {
-      offset += spans[i].str.length;
-    }
-  }*/
-
-
-/*
-  var replacementRangeText = [];
-  for (var i = 0; i < frame.textRanges.length; i++)
-    replacementRangeText[i] = '';
-  var rangeIndex = 0;
-
-  // for (var i = spans.length - 1; i >= 0; i--) {
-  for (var i = 0; i < spans.length; i++) {
-    var span = spans[i];
-    log('Looking for translation for', span.str, span.partOf);
-
-    var rangesToRemove = [];
-
-    var translation = i18n.translate(span.str, span.partOf);
-    if (translation) {
-      log('Translating span', span.str, translation);
-      log('Applying to ranges', span.ranges.length);
-      for (var j = 0; j < span.ranges.length; j++) {
-        log(' - ', span.ranges[j].contents);
-      }
-
-      var intoRange = span.ranges[0];
-      log('Putting into range', intoRange.contents);
-      var trailing = i18n.trailingWhitespace(span.str);
-      log('Trailing space', trailing);
-      for (var l = 1; l < span.ranges.length; l++) {
-        log('Removing range', span.ranges[l].contents);
-        rangesToRemove.push(span.ranges[l]);
-        // span.ranges[l].remove();
-        // span.ranges[l].contents = '';
-      }
-      replacementRangeText[rangeIndex] = translation+trailing;
-      // intoRange.contents = translation+trailing;
-      // intoRange.characters.addBefore(translation+trailing);
-      // range.characterAttributes.language = LanguageType.ITALIAN;
-      // intoRange.contents = intoRange.contents.substring(0, translation.length + trailing.length);
-      // log('Range after replacement', span.ranges[0].contents);
-    } else {
-      replacementRangeText[rangeIndex] = span.str;
-    }
-    rangeIndex += span.ranges.length;
-  }
-
-    // for (var k = 0; k < rangesToRemove.length; k++) {
-    //   log('Removing range', rangesToRemove[k].contents);
-    //   rangesToRemove[k].remove();
-    // }
-
-  for (var i = 0; i < replacementRangeText.length; i++) {
-    range = frame.textRanges[i];
-    log('Replacing range', range.contents);
-    log(' with ', replacementRangeText[i]);
-    range.contents = replacementRangeText[i];
-    log(' becomes ', frame.textRanges[i].contents);
-  }*/
-
-/*
-  var spanranges = [];
-  var prev = false;
-  for ( var k = 0; k < ranges.length; k++ ) {
-    var range = ranges[k];
-    if (prev == false || 
-      (  isEqual(range.characterAttributes.fillColor, prev.characterAttributes.fillColor)
-      && isEqual(range.characterAttributes.textFont, prev.characterAttributes.textFont)
-      && isEqual(range.characterAttributes.size, prev.characterAttributes.size)
-      )) {
-      str = str+String(range.contents);
-      spanranges.push(range);
-    } else {
-      var replacement = i18n.getTranslationReplacement(str, fullstr, filePath);
-      str = replacement[0];
-      var partOf = replacement[1];
-
-
-      log('Looking for translation for', str, partOf);
-      var translation = i18n.translate(str, partOf);
-      if (translation) {
-        log('Translating span', str, translation);
-        var span = spanranges[0];
-        var trailing = i18n.trailingWhitespace(str);
-        for (var l = 1; l < spanranges.length; l++) {
-          spanranges[l].remove();
-        }
-        span.characters.addBefore(translation+trailing);
-        span.characterAttributes.language = LanguageType.ITALIAN;
-        span.contents = span.contents.substring(0, span.contents.length - 1);
-
-        i18n.countTranslatedLines++;
-        countTranslatedFrames++;
-      }
-      str = String(range.contents);
-      spanranges = [ range ];
-    }
-    prev = range;
-  }
-
-
-
-  if (str !== '') {
-    var replacement = i18n.getTranslationReplacement(str, fullstr, filePath);
-    str = replacement[0];
-    var partOf = replacement[1];
-    log('Looking for final translation for', str, partOf);
-    var translation = i18n.translate(str, partOf);
-    if (translation) {
-      log('Translating span', str, translation);
-      var span = spanranges[0];
-      var trailing = i18n.trailingWhitespace(str);
-      for (var l = 1; l < spanranges.length; l++) {
-        spanranges[l].remove();
-      }
-      span.characters.addBefore(translation+trailing);
-      span.characterAttributes.language = LanguageType.ITALIAN;
-      span.contents = span.contents.substring(0, span.contents.length - 1);
-
-      i18n.countTranslatedLines++;
-      return true;
-    }
-  }
-  */
   return true;
 };
 
@@ -463,6 +266,47 @@ i18n.splitFrameIntoSpans = function (frame, filePath) {
   var str = '';
   var spanranges = [];
   var prev = false;
+
+  var accumulate = function (replacement, characterAttributes) {
+    var font = {
+      textFont: characterAttributes.textFont,
+      size: characterAttributes.size,
+      tracking: 25,
+      horizontalScale: 100,
+      f: characterAttributes.textFont.family
+    };
+
+    var translatedFont = font;
+    
+    // log("Substituting font for span", str, "->", replacement[0]);
+    if (i18n.substituteFonts) {
+      for (var f = 0; f < i18n.substitutions.length; f++) {
+        var sub = i18n.substitutions[f];
+        log("Comparing font", font.textFont.family, font.textFont.style, "==", sub['Family'], sub['Style']);
+        if (font.textFont.family == sub['Family'] 
+          && font.textFont.style == sub['Style']) {
+          log("Substituting font", sub['Family'], sub['Style'], "->", sub['To family'], sub['To style']);
+          translatedFont = {
+            textFont: sub.textFont,
+            size: font.size * (sub['To scale'] ? sub['To scale'] : 1),
+            tracking: sub['To tracking'] ? sub['To tracking'] : 25,
+            horizontalScale: sub['To width'] ? sub['To width'] : 100,
+            f: sub['To family']
+          };
+          affected = true;
+        }
+      }
+    }
+
+    spans.push({
+      str: replacement[0], partOf: replacement[1], 
+      // ranges: spanranges,
+      fillColor: characterAttributes.fillColor,
+      font: font,
+      translatedFont: translatedFont
+    });
+  }
+
   for ( var k = 0; k < ranges.length; k++ ) {
     var range = ranges[k];
     if (prev == false || 
@@ -474,11 +318,7 @@ i18n.splitFrameIntoSpans = function (frame, filePath) {
       spanranges.push(range);
     } else {
       var replacement = i18n.getTranslationReplacement(str, fullstr, filePath);
-      spans.push({str: replacement[0], partOf: replacement[1], ranges: spanranges, characterAttributes: {
-          fillColor: prev.characterAttributes.fillColor,
-          textFont: prev.characterAttributes.textFont,
-          size: prev.characterAttributes.size,
-        }});
+      accumulate(replacement, prev.characterAttributes);
 
       str = String(range.contents);
       spanranges = [ range ];
@@ -488,11 +328,7 @@ i18n.splitFrameIntoSpans = function (frame, filePath) {
 
   if (str !== '') {
     var replacement = i18n.getTranslationReplacement(str, fullstr, filePath);
-    spans.push({str: replacement[0], partOf: replacement[1], ranges: spanranges, characterAttributes: {
-        fillColor: prev.characterAttributes.fillColor,
-        textFont: prev.characterAttributes.textFont,
-        size: prev.characterAttributes.size,
-      }});
+    accumulate(replacement, prev.characterAttributes);
   }
   return spans;
 }

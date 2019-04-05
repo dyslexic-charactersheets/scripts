@@ -50,6 +50,7 @@ function deepCopy(obj) {
   return obj;
 }
 
+
 /*
 String.prototype.replaceAll = function(old, replacement) {
      if (old == replacement) return this;
@@ -461,6 +462,7 @@ function exportFolderAsPDF(sourceFolder, destinationFolder) {
   userInteractionLevel = originalInteractionLevel;
 
   log("Exported "+files.length+" files", false, {'Success': success, 'Failed': failure});
+  i18n.tick();
 
   return {
     "files": files.length,

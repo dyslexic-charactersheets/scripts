@@ -8,12 +8,12 @@
 i18n.init();
 
 (function () {
-	var srcFolder = Folder.selectDialog( 'Select the folder of Illustrator files in which you want to replace text', baseFolder);
+	var srcFolder = Folder.selectDialog( 'Select the folder of Illustrator files in which you want to replace text', pagesFolder);
 	if (srcFolder === null) {
 	  return;
 	}
 
-	var dstFolder = Folder.selectDialog('Select a destination folder into which to save translated files', baseFolder+'Languages/');
+	var dstFolder = Folder.selectDialog('Select a destination folder into which to save translated files', pagesFolder+'Languages/');
 	if (dstFolder === null) {
 	  return;
 	}
@@ -23,6 +23,7 @@ i18n.init();
 	  return;
 	}
 
+	i18n.enableFontSubstitutions();
 	i18n.loadTranslations(messagesFile);
 	i18n.applyTranslationsFolder(srcFolder, dstFolder);
 
