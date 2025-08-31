@@ -1,0 +1,2 @@
+Copyright 2025 Marcus Downing
+Licensed under the OGL 1.0a
